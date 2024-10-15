@@ -576,7 +576,7 @@ window.addEventListener(`DOMContentLoaded`, () => {
             e.preventDefault();
 
             // let statusMessage = document.createElement('div'); (Лекция - 84)
-            let statusMessage = document.createElement(`img`);
+            const statusMessage = document.createElement(`img`);
             // statusMessage.classList.add('status'); (Лекция - 84) 
             statusMessage.src = message.loading;
             // statusMessage.src - Мы образаемся напрямую к какому-то нашему DOM узлу и сразу же обращаемся к атрибуту(Точно также мы можем использовать setAttribute и в принципе разницы никакой не будет) 
@@ -593,34 +593,56 @@ window.addEventListener(`DOMContentLoaded`, () => {
 
             // insertAdjacentElement(position, element) - Более гибкий метод, который позволяет нам помещать наши элементы в разные места нашей верстки(добавляет переданный элемент в DOM-дерево относительно элемента, вызвавшего метод.)
         
-            const request = new XMLHttpRequest();
-            request.open('POST', 'server.php');
-            request.setRequestHeader('Content-type', 'application/json; charset=utf-8');
+            // const request = new XMLHttpRequest(); (Лекция - 86)
+            // request.open('POST', 'server.php');  (Лекция - 86)
+            // request.setRequestHeader('Content-type', 'application/json; charset=utf-8'); (Лекция - 86)
+
             const formData = new FormData(form);
 
-            const object = {};
+            // 2) Отправка JSON формат
+            const object = {}; 
             formData.forEach(function(value, key){
                 object[key] = value;
             });
-            const json = JSON.stringify(object);
 
-            request.send(json);
+            // request.send(json); (Лекция - 86)
+            // 1) Отправка fetch
+            fetch(`server1.php`, { //1) - куда отправляем
+                method: 'POST', //2) - каким образом
+                headers: {
+                    'Content-type': 'application/json; charset=utf-8'
+                },
+                body: JSON.stringify(object) //3) - что именно
+            }).then(data => data.text())
+            .then(data => { 
+                console.log(data);
+                showThanksModal(message.success);
+                statusMessage.remove();
+            }).catch(() => {
+                showThanksModal(message.failure);
+            }).finally(() => { 
+                form.reset();
+            })
 
-            request.addEventListener('load', () => {
-                if (request.status === 200) {
-                    console.log(request.response);
-                    // statusMessage.textContent = message.success; (Лекция - 84)
-                    showThanksModal(message.success);
-                    form.reset();
+            // request.addEventListener('load', () => {
+            //     if (request.status === 200) {
+            //         console.log(request.response); (Лекция - 86)
+
+                 // statusMessage.textContent = message.success; (Лекция - 84)
+            
+                    // showThanksModal(message.success);
+                // form.reset(); (Лекция - 86)
+            
                     // setTimeout(() => { (Лекция - 84)
                         // statusMessage.remove();
-                    // }, 2000); 
-                    statusMessage.remove();
-                } else {
+                // }, 2000); 
+            
+                    // statusMessage.remove(); (Лекция - 86)
+                // } else {
                     // statusMessage.textContent = message.failure; (Лекция - 84)
-                    showThanksModal(message.failure);
-                }
-            });
+                    // showThanksModal(message.failure);
+                // }
+            // });
         });
     }
 
@@ -650,7 +672,41 @@ window.addEventListener(`DOMContentLoaded`, () => {
         }, 4000)
     } 
     // Итог Лекции - 84: Когда мы работаем с запросами на сервер(во время обработки и после того как наш запрос завершился), мы можем делать абсолютно все что угодно со страницей(добавлять элементы, картинки, модифицировать классы и др.). Самое главное поставить четкую задачу и следовать по алгоритму действий что за чем вы хотите выполнить.
+
+
+    /*Лекция - 86 (Fetch API)
+    API (Application Programming Interface) - Интерфейс программного обеспечения или приложения т.е это набор данных и возможностей, который предоставляет нам готовое решение, готовые методы и мы можем их использовать.(Например: DOM API, Google maps API...)
+
+    Fetch API - она уже встроена в браузер и она позволяет общаться с сервером и она построена у нас на Promise.*/
+
+    // 1) Запрос GET:
+    // fetch('https://jsonplaceholder.typicode.com/todos/1') //1)- вот из этой конструкции вернется именно promise
+        // /1 - userId
+        
+        // .then(response => response.json()) //2)- все файлы из URL будут JSon и нам нужно их перевести, fetch уже имеет встроенную возможность которые позволяют перевести в обычный JS объект
+         
+        // response.json - она возвращает нам promise, для того чтобы построить дальше цепочку т.к не знаем как быстро JSson объект превратится в обычный JS объект  
+        // .then(json => console.log(json)); //3)- если все успешно прошло, то мы просто выведем в консоль JS объект
     
+        
+        // 2) Как сделать другие запросы(POST, PUT...)
+    // fetch('https://jsonplaceholder.typicode.com/posts', {
+        //Этот объект содержит много различных свойств, НО самыми обязательными являются только два(method, body), желательно еще указывать заголовки.
+    //     method: `POST`,
+    //     body: JSON.stringify({ name: `Alex` }),
+    //     headers: {
+    //         'Content-type': 'application/json'
+    //     }
+    // })
+    //         .then(response => response.json())
+    //         .then(json => console.log(json));
+        
+        
+    //  Методы fetch:
+    // -json(); (Часто используемый)
+    // -text();
+    // ...
+
 });
     
 
