@@ -122,6 +122,8 @@ window.addEventListener(`DOMContentLoaded`, () => {
     });
 });*/
 
+// const { create } = require("browser-sync");
+
 window.addEventListener(`DOMContentLoaded`, () => {
     // Лекция - 63 (Создаем табы в новом проекте)
     //Tabs
@@ -348,45 +350,51 @@ window.addEventListener(`DOMContentLoaded`, () => {
         }
     }
 
-    // 1-ый вариант (мы кладем объект в переменную (в данном случае div))
-    // const div = new MenuCard();
-    // div.render();
+    const getResourses = async (url) => {
+        const res = await fetch(url);
 
-    // 2-ой вариант (объект может существовать без переменной (вызвать можно только один раз))
-    new MenuCard(
-        "img/tabs/vegy.jpg",
-        "vegy",
-        `Меню "Фитнес"`,
-        `Меню "Фитнес" - это новый подход к приготовлению блюд: больше свежих овощей и фруктов. Продукт активных и здоровых людей. Это абсолютно новый продукт с оптимальной ценой и высоким качеством!`,
-        9,
-        `.menu .container`,
-        
-    ).render(); // метод вызвался, отработал и он исчезнет т.к на него больше не будет ссылок, мы нигде не сохраняем этот объект.()
+        if (!res.ok) { 
+           throw new Error(`Could not fetch ${url}, status: ${res.status}`); //- выкидываем ошибку в ручном режиме
+        }
 
-    new MenuCard(
-        "img/tabs/elite.jpg",
-        "elite",
-        `Меню “Премиум”`,
-        `В меню “Премиум” мы используем не только красивый дизайн упаковки, но и качественное исполнение блюд. Красная рыба, морепродукты, фрукты - ресторанное меню без похода в ресторан!`,
-        14,
-        `.menu .container`,
-        `menu__item`,
-        
-    ).render();
+        return await res.json();
+    };
 
-    new MenuCard(
-        "img/tabs/post.jpg",
-        "post",
-        `Меню "Постное"`,
-        `Меню “Постное” - это тщательный подбор ингредиентов: полное отсутствие продуктов животного происхождения, молоко из миндаля, овса, кокоса или гречки, правильное количество белков за счет тофу и импортных вегетарианских стейков.`,
-        21,
-        `.menu .container`,
-        `menu__item`,
-        
-    ).render();
-
-    // Чтобы script не слетал, можно удалить(закомментировать) часть кода которая ответсвенна за карточки.
+    /*1-ый вариант*/
+    getResourses(`http://localhost:3000/menu`)
+        .then(data => {
+            data.forEach(({img, altimg, title, descr, price}) => { // используем деструктуризацию объекта, чтобы вытащить из объекта свойства в качестве отдельной переменной
+                new MenuCard(img, altimg, title, descr, price, `.menu .container`).render(); // (Обращаемся к class MenuCard) - этот конструктор будет у меня создаваться столько раз, сколько будет объектов внутри массива внутри сервера(db.json) 
+            });
+        });
     
+    /* 2-ой вариант создания определенных элементов динимачески на странице (Отличие в том, что он не будет использовать классы, а будет сразу формировать верстку на лету). ЕСЛИ НАМ НЕОБХОДИМО ЧТО-ТО ОДИН РАЗ ТОЛЬКО ПОСТРОИТЬ, ТО МОЖНО ПРИМЕНЯТЬ ЭТОТ МЕТОД
+
+    getResourses(`http://localhost:3000/menu`)
+        .then(data => createCard(data));
+    
+    function createCard(data) { 
+        data.forEach(({ img, altimg, title, descr, price }) => { 
+            const element = document.createElement(`div`);
+            price = Math.floor(price * 3.30);
+            element.classList.add(`menu__item`);
+
+            element.innerHTML = `
+                <img src=${img} alt=${altimg}>
+                    <h3 class="menu__item-subtitle">${title}</h3>
+                    <div class="menu__item-descr">${descr}</div>
+                    <div class="menu__item-divider"></div>
+                    <div class="menu__item-price">
+                        <div class="menu__item-cost">Цена:</div>
+                        <div class="menu__item-total"><span>${price}</span> грн/день</div>
+                    </div>
+                
+            `;
+
+            document.querySelector(`.menu .container`).append(element);
+        })
+    }*/
+
     // Объект может существовать без переменной - делается это тогда, когда этот объект используется только на месте т.е если мы его сейчас в переменную никакую не положим, то потом он просто потеряется т.е создаться и удалиться т.к на него не будет потом просто никаких ссылок.
 
     /*Forms (Недоделанная попытка)
@@ -561,26 +569,35 @@ window.addEventListener(`DOMContentLoaded`, () => {
     
     const forms = document.querySelectorAll('form');
     const message = {
-        // loading: 'Загрузка...', (Лекция - 84)
         loading: `img/form/spinner.svg`,
         success: 'Спасибо! Скоро мы с вами свяжемся',
         failure: 'Что-то пошло не так...'
     };
 
     forms.forEach(item => {
-        postData(item);
+        bindPostData(item);
     });
 
-    function postData(form) {
+    const postData = async (url, data) => {
+        const res = await fetch(url, {
+            method: `POST`,
+            headers: {
+                'Content-type': 'application/json'
+            },
+            body: data
+        });
+
+        return await res.json();
+    };
+
+    function bindPostData(form) {
         form.addEventListener('submit', (e) => {
             e.preventDefault();
 
-            // let statusMessage = document.createElement('div'); (Лекция - 84)
+
             const statusMessage = document.createElement(`img`);
-            // statusMessage.classList.add('status'); (Лекция - 84) 
             statusMessage.src = message.loading;
             // statusMessage.src - Мы образаемся напрямую к какому-то нашему DOM узлу и сразу же обращаемся к атрибуту(Точно также мы можем использовать setAttribute и в принципе разницы никакой не будет) 
-            // statusMessage.textContent = message.loading; (Лекция - 84)
             statusMessage.style.cssText = `
             display:block;
             margin: 0 auto;
@@ -599,27 +616,13 @@ window.addEventListener(`DOMContentLoaded`, () => {
 
             // insertAdjacentElement(position, element) - Более гибкий метод, который позволяет нам помещать наши элементы в разные места нашей верстки(добавляет переданный элемент в DOM-дерево относительно элемента, вызвавшего метод.)
         
-            // const request = new XMLHttpRequest(); (Лекция - 86)
-            // request.open('POST', 'server.php');  (Лекция - 86)
-            // request.setRequestHeader('Content-type', 'application/json; charset=utf-8'); (Лекция - 86)
 
             const formData = new FormData(form);
 
             // 2) Отправка JSON формат
-            const object = {}; 
-            formData.forEach(function(value, key){
-                object[key] = value;
-            });
-
-            // request.send(json); (Лекция - 86)
-            // 1) Отправка fetch
-            fetch(`server1.php`, { //1) - куда отправляем
-                method: 'POST', //2) - каким образом
-                headers: {
-                    'Content-type': 'application/json; charset=utf-8'
-                },
-                body: formData //3) - что именно (можно и formData (const formData = new FormData(form);) или JSON (JSON.stringify(object), но для этого нужно было перебрать в новый объект) )
-            }).then(data => data.text())
+            const json = JSON.stringify(Object.fromEntries(formData.entries()));
+           
+            postData(`http://localhost:3000/requests`, json)
             .then(data => { 
                 console.log(data);
                 showThanksModal(message.success);
@@ -629,27 +632,6 @@ window.addEventListener(`DOMContentLoaded`, () => {
             }).finally(() => { 
                 form.reset(); // Восстанавливает значения по умолчанию элемента формы.
             })
-
-            // Уже ненужный код
-            // request.addEventListener('load', () => {
-            //     if (request.status === 200) {
-            //         console.log(request.response); (Лекция - 86)
-
-                 // statusMessage.textContent = message.success; (Лекция - 84)
-            
-                    // showThanksModal(message.success);
-                // form.reset(); (Лекция - 86)
-            
-                    // setTimeout(() => { (Лекция - 84)
-                        // statusMessage.remove();
-                // }, 2000); 
-            
-                    // statusMessage.remove(); (Лекция - 86)
-                // } else {
-                    // statusMessage.textContent = message.failure; (Лекция - 84)
-                    // showThanksModal(message.failure);
-                // }
-            // });
         });
     }
 
@@ -659,7 +641,7 @@ window.addEventListener(`DOMContentLoaded`, () => {
         const prevModalDialog = document.querySelector(`.modal__dialog`);
 
         prevModalDialog.classList.add('hide');
-        openModal(); // Функция из предыдущих лекций
+        openModal(); 
 
         const thanksModal = document.createElement(`div`);
         thanksModal.classList.add(`modal__dialog`);
@@ -675,17 +657,12 @@ window.addEventListener(`DOMContentLoaded`, () => {
             thanksModal.remove();
             prevModalDialog.classList.add(`show`, `fade`);
             prevModalDialog.classList.remove(`hide`);
-            closeModal(); // Функция из предыдущих лекций
+            closeModal(); 
         }, 4000)
     } 
     // Итог Лекции - 84: Когда мы работаем с запросами на сервер(во время обработки и после того как наш запрос завершился), мы можем делать абсолютно все что угодно со страницей(добавлять элементы, картинки, модифицировать классы и др.). Самое главное поставить четкую задачу и следовать по алгоритму действий что за чем вы хотите выполнить.
  
 
-    fetch(`http://localhost:3000/menu`)
-      .then(data => data.json())
-      .then(res => console.log(res));
-    
-    
 });
     
 
