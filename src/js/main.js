@@ -241,7 +241,7 @@ window.addEventListener(`DOMContentLoaded`, () => {
     
     const modalOpenBtn = document.querySelectorAll(`[data-modal]`),
         modal = document.querySelector(`.modal`);
-        // modalCloseBtn = document.querySelector(`[data-close]`);
+    // modalCloseBtn = document.querySelector(`[data-close]`);
     
     // Вариант без использования toggle
     modalOpenBtn.forEach(btn => {
@@ -353,20 +353,20 @@ window.addEventListener(`DOMContentLoaded`, () => {
     const getResourses = async (url) => {
         const res = await fetch(url);
 
-        if (!res.ok) { 
-           throw new Error(`Could not fetch ${url}, status: ${res.status}`); //- выкидываем ошибку в ручном режиме
+        if (!res.ok) {
+            throw new Error(`Could not fetch ${url}, status: ${res.status}`); //- выкидываем ошибку в ручном режиме
         }
 
         return await res.json();
     };
 
     /*1-ый вариант*/
-    getResourses(`http://localhost:3000/menu`)
-        .then(data => {
-            data.forEach(({img, altimg, title, descr, price}) => { // используем деструктуризацию объекта, чтобы вытащить из объекта свойства в качестве отдельной переменной
-                new MenuCard(img, altimg, title, descr, price, `.menu .container`).render(); // (Обращаемся к class MenuCard) - этот конструктор будет у меня создаваться столько раз, сколько будет объектов внутри массива внутри сервера(db.json) 
-            });
-        });
+    // getResourses(`http://localhost:3000/menu`)
+    //     .then(data => {
+    //         data.forEach(({img, altimg, title, descr, price}) => { // используем деструктуризацию объекта, чтобы вытащить из объекта свойства в качестве отдельной переменной
+    //             new MenuCard(img, altimg, title, descr, price, `.menu .container`).render(); // (Обращаемся к class MenuCard) - этот конструктор будет у меня создаваться столько раз, сколько будет объектов внутри массива внутри сервера(db.json) 
+    //         });
+    //     });
     
     /* 2-ой вариант создания определенных элементов динимачески на странице (Отличие в том, что он не будет использовать классы, а будет сразу формировать верстку на лету). ЕСЛИ НАМ НЕОБХОДИМО ЧТО-ТО ОДИН РАЗ ТОЛЬКО ПОСТРОИТЬ, ТО МОЖНО ПРИМЕНЯТЬ ЭТОТ МЕТОД
 
@@ -397,278 +397,279 @@ window.addEventListener(`DOMContentLoaded`, () => {
 
     // Объект может существовать без переменной - делается это тогда, когда этот объект используется только на месте т.е если мы его сейчас в переменную никакую не положим, то потом он просто потеряется т.е создаться и удалиться т.к на него не будет потом просто никаких ссылок.
 
-    /*Forms (Недоделанная попытка)
-
-    const forms = document.querySelectorAll(`form`); 
-
-    const message = {
-        loading: `Загрузка`, 
-        succes: `Спасибо! Скоро мы с вами свяжемся`,
-        failure: `Что-то пошло не так...`
-    };
-
-    forms.forEach(item => { 
-        postData(item);
-    })
-
-    function postData(form) { 
-        form.addEventListener(`submit`, (event) => { 
-            event.preventDefault();
-
-            let statusMessage = document.createElement(`div`);
-            statusMessage.classList.add(`status`);
-            statusMessage.textContent = message.loading;
-            form.append(statusMessage);
-
-            const request = new XMLHttpRequest();
-            request.open(`POST`, `server.php`);
-
-            // Как сделать так, чтобы все данные которые заполнил пользователь в форме, мы получили в JS и смогли отправить на сервер.Самый простой способ - это использовать объект FormData (нам не всегда нужно передавать в формате JSON. Завивисит от того с какой технологией с который мы работаем на Backend).;
-
-            // FormData(откуда берем данные) - это специальный объект, который позволяет с определенной формы быстро сформировать данные которые заполнил пользователь(ключ, значение). 
-            
-            // !Самое главное это указывать атрибут name, иначе FormData не сможет найти этот input и не сможет найти ему нужные данные.
-            
-            // request.setRequestHeader(`Content-type`, `multipart/form-data`);
-            // !Когда мы используем связку XMLHttpRequest + FormData, то нам заголовок устанавливать не нужно т . к он устанавливается автоматически
-            const formData = new FormData(form);
-
-            request.send(formData);
-
-            request.addEventListener(`load`, () => {
-                if (request.status === 200) {
-                    console.log(request.response)
-                    statusMessage.textContent = message.succes;
-                } else { 
-                    status.massage.textContent = message.failure;
-                }
-                // Когда мы работаем с локальным сервером, то мы каждый раз после каких-то изменений должны сбрасывать кэш. Делается для того, чтобы новые изменения применились. (Shift + F5)
+    // Лекция - 90
+    axios.get(`http://localhost:3000/menu`)
+        .then(data => {
+            data.data.forEach(({ img, altimg, title, descr, price }) => {
+                new MenuCard(img, altimg, title, descr, price, `.menu .container`).render();
             })
-        })
-    }*/
+            
+            // data.data(обращаемся к данным, которые мы получили от сервера)
 
-    
-    //Forms 
-
-    /*Первый пример без использования JSON
-     const forms = document.querySelectorAll(`form`);
- 
-     // По сути это небольшое хранилище сообщений, которых мы хотим показать пользователю
-     const message = {
-         loading: `Загрузка`,
-         success: `Спасибо! Скоро мы с вами свяжемся`,
-         failure: `Что-то пошло не так...`
-     };
- 
-     forms.forEach(item => { 
-         postData(item);
-     })
- 
-     function postData(form) { 
-         form.addEventListener(`submit`, (event) => {    
-             event.preventDefault();
- 
-             //(message) Чтобы поместить message, мы динимачески создадим новый блок на странице и выводим сообщение(картинку, текс и т.д), чаще всего он добавляется к форме.
- 
-             const statusMesage = document.createElement(`div`);
-             statusMesage.classList.add(`status`);
-             statusMesage.textContent = message.loading;
-             form.append(statusMesage);
- 
- 
-             const request = new XMLHttpRequest();
-             request.open(`POST`, `server.php`);
-             
-             // Как сделать так, чтобы все данные которые заполнил пользователь в форме, мы получили в JS и смогли отправить на сервер. Конечно мы в ручную могли бы взять эту форму, взять все input и их value, перебрать, сформировать объект. Но это запарное занятие и у нас есть готовый механизм для этого всего. Самый простой способ - это использовать объект FormData (нам не всегда нужно передавать в формате JSON. Завивисит от того с какой технологией с который мы работаем на Backend).;
- 
-             // FormData(откуда берем данные) - это специальный объект, который позволяет с определенной формы быстро сформировать данные которые заполнил пользователь(ключ, значение). 
-             
-             // !Важный момент, на котором можно запнуться - это зависит от добросовестности верстальщика и касается того, как сверстаны формы и как прописаны input. Самое главное, что когда мы подрузумеваем, что эти данные будут идти на сервер, мы должны АБСОЛЮТНО ВСЕГДА! указывать атрибут name (name = `неважно какой текст(name)`). Иначе FormData не сможет найти этот input и не сможет найти ему нужные данные.
-             
-             // request.setRequestHeader(`Content-type`, `multipart/form-data`);
-              // !Когда мы используем связку XMLHttpRequest + FormData, то нам заголовок устанавливать не нужно т . к он устанавливается автоматически(именно из-за этой проблемы, мы не получили данные на сервере). Значит request.setRequestHeader устанавливать не нужно!!
- 
-             
-             // `multipart/form-data` - чтобы работать с formData, нам нужно установить такой заголовок.
- 
-             const formData = new FormData(form);
- 
-             request.send(formData);
- 
-             request.addEventListener('load', () => {
-                 if (request.status === 200) {
-                     console.log(request.response);
-                     statusMesage.textContent = message.success;
-                     form.reset();
-                     setTimeout(() => {
-                         statusMesage.remove();
-                     }, 2000);
-                 } else {
-                     statusMesage.textContent = message.failure;
-                 }
-             });
-         })
-     }
- 
-     // !Важный момент. Когда мы работаем на локальном сервере, то придется каждый раз после каких-то изменений сбрасывать кэш. Делается для того, чтобы все изменения применились на странице, потому что сейчас сервер запонимает старые изменения, чтобы их каждый раз не подгружать и это называется - кэш. (Комбинация для очистки: Shift + F5)*/
-
-    // 2) Но если мы хотим, чтобы наш сервер принимал данные не в обычном формате, а в JSON.Значит нужны данные в формате JSON.
-    
-    // const forms = document.querySelectorAll('form');
-    // const message = {
-    //     loading: 'Загрузка...',
-    //     success: 'Спасибо! Скоро мы с вами свяжемся',
-    //     failure: 'Что-то пошло не так...'
-    // };
-
-    // forms.forEach(item => {
-    //     postData(item);
-    // });
-
-    // function postData(form) {
-    //     form.addEventListener('submit', (e) => {
-    //         e.preventDefault();
-
-    //         let statusMessage = document.createElement('div');
-    //         statusMessage.classList.add('status');
-    //         statusMessage.textContent = message.loading;
-    //         form.appendChild(statusMessage);
+            /*Forms (Недоделанная попытка)
         
-    //         const request = new XMLHttpRequest();
-    //         request.open('POST', 'server.php');
-    //         request.setRequestHeader('Content-type', 'application/json; charset=utf-8');
+            const forms = document.querySelectorAll(`form`); 
+        
+            const message = {
+                loading: `Загрузка`, 
+                succes: `Спасибо! Скоро мы с вами свяжемся`,
+                failure: `Что-то пошло не так...`
+            };
+        
+            forms.forEach(item => { 
+                postData(item);
+            })
+        
+            function postData(form) { 
+                form.addEventListener(`submit`, (event) => { 
+                    event.preventDefault();
+        
+                    let statusMessage = document.createElement(`div`);
+                    statusMessage.classList.add(`status`);
+                    statusMessage.textContent = message.loading;
+                    form.append(statusMessage);
+        
+                    const request = new XMLHttpRequest();
+                    request.open(`POST`, `server.php`);
+        
+                    // Как сделать так, чтобы все данные которые заполнил пользователь в форме, мы получили в JS и смогли отправить на сервер.Самый простой способ - это использовать объект FormData (нам не всегда нужно передавать в формате JSON. Завивисит от того с какой технологией с который мы работаем на Backend).;
+        
+                    // FormData(откуда берем данные) - это специальный объект, который позволяет с определенной формы быстро сформировать данные которые заполнил пользователь(ключ, значение). 
+                    
+                    // !Самое главное это указывать атрибут name, иначе FormData не сможет найти этот input и не сможет найти ему нужные данные.
+                    
+                    // request.setRequestHeader(`Content-type`, `multipart/form-data`);
+                    // !Когда мы используем связку XMLHttpRequest + FormData, то нам заголовок устанавливать не нужно т . к он устанавливается автоматически
+                    const formData = new FormData(form);
+        
+                    request.send(formData);
+        
+                    request.addEventListener(`load`, () => {
+                        if (request.status === 200) {
+                            console.log(request.response)
+                            statusMessage.textContent = message.succes;
+                        } else { 
+                            status.massage.textContent = message.failure;
+                        }
+                        // Когда мы работаем с локальным сервером, то мы каждый раз после каких-то изменений должны сбрасывать кэш. Делается для того, чтобы новые изменения применились. (Shift + F5)
+                    })
+                })
+            }*/
 
-    //         const formData = new FormData(form);
-
-    //         // У нас есть formData, который необходимо превратить в формат JSON(formData специфический объект и мы не можем просто так его прогнать в другой формат). Используем следующий прием
-
-    //         const object = {};
-    //         formData.forEach(function (value, key) {
-    //             object[key] = value;
-    //         });
-    //         const json = JSON.stringify(object);
-
-    //         request.send(json);
-
-    //         // Есть небольшой нюанс с Backend разработкой. PHP не умеет работать с форматами данных JSON, чаще всего будем отправлять данные на сервера с использованием nodeJS. Но все равно с таким типо данных можно поработать (смотри server.php)
-
-    //         request.addEventListener('load', () => {
-    //             if (request.status === 200) {
-    //                 console.log(request.response);
-    //                 statusMessage.textContent = message.success;
-    //                 form.reset();
-    //                 setTimeout(() => {
-    //                     statusMessage.remove();
-    //                 }, 2000);
-    //             } else {
-    //                 statusMessage.textContent = message.failure;
-    //             }
-    //         });
-    //     });
-    // }
     
-    const forms = document.querySelectorAll('form');
-    const message = {
-        loading: `img/form/spinner.svg`,
-        success: 'Спасибо! Скоро мы с вами свяжемся',
-        failure: 'Что-то пошло не так...'
-    };
+            //Forms 
 
-    forms.forEach(item => {
-        bindPostData(item);
-    });
+            /*Первый пример без использования JSON
+             const forms = document.querySelectorAll(`form`);
+         
+             // По сути это небольшое хранилище сообщений, которых мы хотим показать пользователю
+             const message = {
+                 loading: `Загрузка`,
+                 success: `Спасибо! Скоро мы с вами свяжемся`,
+                 failure: `Что-то пошло не так...`
+             };
+         
+             forms.forEach(item => { 
+                 postData(item);
+             })
+         
+             function postData(form) { 
+                 form.addEventListener(`submit`, (event) => {    
+                     event.preventDefault();
+         
+                     //(message) Чтобы поместить message, мы динимачески создадим новый блок на странице и выводим сообщение(картинку, текс и т.д), чаще всего он добавляется к форме.
+         
+                     const statusMesage = document.createElement(`div`);
+                     statusMesage.classList.add(`status`);
+                     statusMesage.textContent = message.loading;
+                     form.append(statusMesage);
+         
+         
+                     const request = new XMLHttpRequest();
+                     request.open(`POST`, `server.php`);
+                     
+                     // Как сделать так, чтобы все данные которые заполнил пользователь в форме, мы получили в JS и смогли отправить на сервер. Конечно мы в ручную могли бы взять эту форму, взять все input и их value, перебрать, сформировать объект. Но это запарное занятие и у нас есть готовый механизм для этого всего. Самый простой способ - это использовать объект FormData (нам не всегда нужно передавать в формате JSON. Завивисит от того с какой технологией с который мы работаем на Backend).;
+         
+                     // FormData(откуда берем данные) - это специальный объект, который позволяет с определенной формы быстро сформировать данные которые заполнил пользователь(ключ, значение). 
+                     
+                     // !Важный момент, на котором можно запнуться - это зависит от добросовестности верстальщика и касается того, как сверстаны формы и как прописаны input. Самое главное, что когда мы подрузумеваем, что эти данные будут идти на сервер, мы должны АБСОЛЮТНО ВСЕГДА! указывать атрибут name (name = `неважно какой текст(name)`). Иначе FormData не сможет найти этот input и не сможет найти ему нужные данные.
+                     
+                     // request.setRequestHeader(`Content-type`, `multipart/form-data`);
+                      // !Когда мы используем связку XMLHttpRequest + FormData, то нам заголовок устанавливать не нужно т . к он устанавливается автоматически(именно из-за этой проблемы, мы не получили данные на сервере). Значит request.setRequestHeader устанавливать не нужно!!
+         
+                     
+                     // `multipart/form-data` - чтобы работать с formData, нам нужно установить такой заголовок.
+         
+                     const formData = new FormData(form);
+         
+                     request.send(formData);
+         
+                     request.addEventListener('load', () => {
+                         if (request.status === 200) {
+                             console.log(request.response);
+                             statusMesage.textContent = message.success;
+                             form.reset();
+                             setTimeout(() => {
+                                 statusMesage.remove();
+                             }, 2000);
+                         } else {
+                             statusMesage.textContent = message.failure;
+                         }
+                     });
+                 })
+             }
+         
+             // !Важный момент. Когда мы работаем на локальном сервере, то придется каждый раз после каких-то изменений сбрасывать кэш. Делается для того, чтобы все изменения применились на странице, потому что сейчас сервер запонимает старые изменения, чтобы их каждый раз не подгружать и это называется - кэш. (Комбинация для очистки: Shift + F5)*/
 
-    const postData = async (url, data) => {
-        const res = await fetch(url, {
-            method: `POST`,
-            headers: {
-                'Content-type': 'application/json'
-            },
-            body: data
-        });
+            // 2) Но если мы хотим, чтобы наш сервер принимал данные не в обычном формате, а в JSON.Значит нужны данные в формате JSON.
+    
+            // const forms = document.querySelectorAll('form');
+            // const message = {
+            //     loading: 'Загрузка...',
+            //     success: 'Спасибо! Скоро мы с вами свяжемся',
+            //     failure: 'Что-то пошло не так...'
+            // };
 
-        return await res.json();
-    };
+            // forms.forEach(item => {
+            //     postData(item);
+            // });
 
-    function bindPostData(form) {
-        form.addEventListener('submit', (e) => {
-            e.preventDefault();
+            // function postData(form) {
+            //     form.addEventListener('submit', (e) => {
+            //         e.preventDefault();
+
+            //         let statusMessage = document.createElement('div');
+            //         statusMessage.classList.add('status');
+            //         statusMessage.textContent = message.loading;
+            //         form.appendChild(statusMessage);
+        
+            //         const request = new XMLHttpRequest();
+            //         request.open('POST', 'server.php');
+            //         request.setRequestHeader('Content-type', 'application/json; charset=utf-8');
+
+            //         const formData = new FormData(form);
+
+            //         // У нас есть formData, который необходимо превратить в формат JSON(formData специфический объект и мы не можем просто так его прогнать в другой формат). Используем следующий прием
+
+            //         const object = {};
+            //         formData.forEach(function (value, key) {
+            //             object[key] = value;
+            //         });
+            //         const json = JSON.stringify(object);
+
+            //         request.send(json);
+
+            //         // Есть небольшой нюанс с Backend разработкой. PHP не умеет работать с форматами данных JSON, чаще всего будем отправлять данные на сервера с использованием nodeJS. Но все равно с таким типо данных можно поработать (смотри server.php)
+
+            //         request.addEventListener('load', () => {
+            //             if (request.status === 200) {
+            //                 console.log(request.response);
+            //                 statusMessage.textContent = message.success;
+            //                 form.reset();
+            //                 setTimeout(() => {
+            //                     statusMessage.remove();
+            //                 }, 2000);
+            //             } else {
+            //                 statusMessage.textContent = message.failure;
+            //             }
+            //         });
+            //     });
+            // }
+    
+            const forms = document.querySelectorAll('form');
+            const message = {
+                loading: `img/form/spinner.svg`,
+                success: 'Спасибо! Скоро мы с вами свяжемся',
+                failure: 'Что-то пошло не так...'
+            };
+
+            forms.forEach(item => {
+                bindPostData(item);
+            });
+
+            const postData = async (url, data) => {
+                const res = await fetch(url, {
+                    method: `POST`,
+                    headers: {
+                        'Content-type': 'application/json'
+                    },
+                    body: data
+                });
+
+                return await res.json();
+            };
+
+            function bindPostData(form) {
+                form.addEventListener('submit', (e) => {
+                    e.preventDefault();
 
 
-            const statusMessage = document.createElement(`img`);
-            statusMessage.src = message.loading;
-            // statusMessage.src - Мы образаемся напрямую к какому-то нашему DOM узлу и сразу же обращаемся к атрибуту(Точно также мы можем использовать setAttribute и в принципе разницы никакой не будет) 
-            statusMessage.style.cssText = `
+                    const statusMessage = document.createElement(`img`);
+                    statusMessage.src = message.loading;
+                    // statusMessage.src - Мы образаемся напрямую к какому-то нашему DOM узлу и сразу же обращаемся к атрибуту(Точно также мы можем использовать setAttribute и в принципе разницы никакой не будет) 
+                    statusMessage.style.cssText = `
             display:block;
             margin: 0 auto;
             `; //(Или можно просто все добавить в css и просто добавить класс т.к так даже будет правильнее)))
 
-            // cssText - Можем записать css стили которые применятся в формате inline к элементу
+                    // cssText - Можем записать css стили которые применятся в формате inline к элементу
 
-            // form.append(statusMessage);
-            form.insertAdjacentElement(`afterend`, statusMessage);
-            // elem.insertAdjacentHTML(where, html).
+                    // form.append(statusMessage);
+                    form.insertAdjacentElement(`afterend`, statusMessage);
+                    // elem.insertAdjacentHTML(where, html).
 
-            // "beforebegin" – вставить html непосредственно перед elem,
-            // "afterbegin" – вставить html в начало elem,
-            // "beforeend" – вставить html в конец elem,
-            // "afterend" – вставить html непосредственно после elem.
+                    // "beforebegin" – вставить html непосредственно перед elem,
+                    // "afterbegin" – вставить html в начало elem,
+                    // "beforeend" – вставить html в конец elem,
+                    // "afterend" – вставить html непосредственно после elem.
 
-            // insertAdjacentElement(position, element) - Более гибкий метод, который позволяет нам помещать наши элементы в разные места нашей верстки(добавляет переданный элемент в DOM-дерево относительно элемента, вызвавшего метод.)
+                    // insertAdjacentElement(position, element) - Более гибкий метод, который позволяет нам помещать наши элементы в разные места нашей верстки(добавляет переданный элемент в DOM-дерево относительно элемента, вызвавшего метод.)
         
 
-            const formData = new FormData(form);
+                    const formData = new FormData(form);
 
-            // 2) Отправка JSON формат
-            const json = JSON.stringify(Object.fromEntries(formData.entries()));
+                    // 2) Отправка JSON формат
+                    const json = JSON.stringify(Object.fromEntries(formData.entries()));
            
-            postData(`http://localhost:3000/requests`, json)
-            .then(data => { 
-                console.log(data);
-                showThanksModal(message.success);
-                statusMessage.remove();
-            }).catch(() => {
-                showThanksModal(message.failure);
-            }).finally(() => { 
-                form.reset(); // Восстанавливает значения по умолчанию элемента формы.
-            })
-        });
-    }
+                    postData(`http://localhost:3000/requests`, json)
+                        .then(data => {
+                            console.log(data);
+                            showThanksModal(message.success);
+                            statusMessage.remove();
+                        }).catch(() => {
+                            showThanksModal(message.failure);
+                        }).finally(() => {
+                            form.reset(); // Восстанавливает значения по умолчанию элемента формы.
+                        })
+                });
+            }
 
-    // Дополнение к Forms(Лекция - 84)
+            // Дополнение к Forms(Лекция - 84)
     
-    function showThanksModal(message) { 
-        const prevModalDialog = document.querySelector(`.modal__dialog`);
+            function showThanksModal(message) {
+                const prevModalDialog = document.querySelector(`.modal__dialog`);
 
-        prevModalDialog.classList.add('hide');
-        openModal(); 
+                prevModalDialog.classList.add('hide');
+                openModal();
 
-        const thanksModal = document.createElement(`div`);
-        thanksModal.classList.add(`modal__dialog`);
-        thanksModal.innerHTML = `
+                const thanksModal = document.createElement(`div`);
+                thanksModal.classList.add(`modal__dialog`);
+                thanksModal.innerHTML = `
         <div class = "modal__content">
             <div class = "modal__close" data-close>×</div>
             <div class = "modal__title">${message}</div>
         </div>
         `;
 
-        document.querySelector(`.modal`).append(thanksModal);
-        setTimeout(() => { 
-            thanksModal.remove();
-            prevModalDialog.classList.add(`show`, `fade`);
-            prevModalDialog.classList.remove(`hide`);
-            closeModal(); 
-        }, 4000)
-    } 
-    // Итог Лекции - 84: Когда мы работаем с запросами на сервер(во время обработки и после того как наш запрос завершился), мы можем делать абсолютно все что угодно со страницей(добавлять элементы, картинки, модифицировать классы и др.). Самое главное поставить четкую задачу и следовать по алгоритму действий что за чем вы хотите выполнить.
- 
+                document.querySelector(`.modal`).append(thanksModal);
+                setTimeout(() => {
+                    thanksModal.remove();
+                    prevModalDialog.classList.add(`show`, `fade`);
+                    prevModalDialog.classList.remove(`hide`);
+                    closeModal();
+                }, 4000)
+            }
+            // Итог Лекции - 84: Когда мы работаем с запросами на сервер(во время обработки и после того как наш запрос завершился), мы можем делать абсолютно все что угодно со страницей(добавлять элементы, картинки, модифицировать классы и др.). Самое главное поставить четкую задачу и следовать по алгоритму действий что за чем вы хотите выполнить.
 
+        });
 });
-    
-
-
-
-
-
-
- 
