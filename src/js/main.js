@@ -608,9 +608,9 @@ window.addEventListener(`DOMContentLoaded`, () => {
                     statusMessage.src = message.loading;
                     // statusMessage.src - Мы образаемся напрямую к какому-то нашему DOM узлу и сразу же обращаемся к атрибуту(Точно также мы можем использовать setAttribute и в принципе разницы никакой не будет) 
                     statusMessage.style.cssText = `
-            display:block;
-            margin: 0 auto;
-            `; //(Или можно просто все добавить в css и просто добавить класс т.к так даже будет правильнее)))
+                    display:block;
+                    margin: 0 auto;
+                    `; //(Или можно просто все добавить в css и просто добавить класс т.к так даже будет правильнее)))
 
                     // cssText - Можем записать css стили которые применятся в формате inline к элементу
 
@@ -655,11 +655,11 @@ window.addEventListener(`DOMContentLoaded`, () => {
                 const thanksModal = document.createElement(`div`);
                 thanksModal.classList.add(`modal__dialog`);
                 thanksModal.innerHTML = `
-        <div class = "modal__content">
-            <div class = "modal__close" data-close>×</div>
-            <div class = "modal__title">${message}</div>
-        </div>
-        `;
+                <div class = "modal__content">
+                    <div class = "modal__close" data-close>×</div>
+                    <div class = "modal__title">${message}</div>
+                </div>
+                `;
 
                 document.querySelector(`.modal`).append(thanksModal);
                 setTimeout(() => {
@@ -672,4 +672,56 @@ window.addEventListener(`DOMContentLoaded`, () => {
             // Итог Лекции - 84: Когда мы работаем с запросами на сервер(во время обработки и после того как наш запрос завершился), мы можем делать абсолютно все что угодно со страницей(добавлять элементы, картинки, модифицировать классы и др.). Самое главное поставить четкую задачу и следовать по алгоритму действий что за чем вы хотите выполнить.
 
         });
+    
+    /*Лекция - 91 (1-й вариант, более простой) (Создаем слайдер на сайте)*/
+
+    const slides = document.querySelectorAll('.offer__slide'),
+          prev = document.querySelector(`.offer__slider-prev`),
+          next = document.querySelector(`.offer__slider-next`),
+          total = document.querySelector('#total'),
+          current = document.querySelector(`#current`);
+          
+    let slideIndex = 1;
+
+    showSlides(slideIndex); // - инициализируем(чтобы он изначально в ту структуру, в которую мы должны увидеть). Эта функция будет вызываться каждый раз, как мы будем нажимать на стрелку на странице(prev, next)
+
+    if (slides.length < 5) {
+        total.textContent = `0${slides.length}`
+    } else { 
+        total.textContent = slides.length;
+    }
+
+    function showSlides(n) { 
+        if (n > slides.length) { 
+            slideIndex = 1;
+        }
+
+        if (n < 1) { 
+            slideIndex = slides.length;
+        }
+
+        slides.forEach(item => { 
+            item.style.display = `none`;
+        })
+
+        slides[slideIndex - 1].style.display = `block`;
+
+        if (slides.length < 10) {
+            current.textContent = `0${slideIndex}`
+        } else { 
+            current.textContent = slideIndex;
+        }
+    }
+
+    function plusSlides(n) { 
+        showSlides(slideIndex += n)
+    }
+
+    prev.addEventListener(`click`, () => {
+        plusSlides(-1);
+    });
+    
+    next.addEventListener(`click`, () => {
+        plusSlides(1);
+    });
 });
