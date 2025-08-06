@@ -151,7 +151,7 @@ function cards() {
             this.price = price;
             this.classes = classes;
             this.parent = document.querySelector(parentSelector);
-            this.transfer = 27;
+            this.transfer = 3;
             this.changeToUAH(); 
         }
 
@@ -176,7 +176,7 @@ function cards() {
                 <div class="menu__item-divider"></div>
                 <div class="menu__item-price">
                     <div class="menu__item-cost">Цена:</div>
-                    <div class="menu__item-total"><span>${this.price}</span> грн/день</div>
+                    <div class="menu__item-total"><span>${this.price}</span> USD/месяц</div>
                 </div>
             `;
             this.parent.append(element);
@@ -768,7 +768,7 @@ window.addEventListener(`DOMContentLoaded`, () => {
 
     (0,_modules_tabs_js__WEBPACK_IMPORTED_MODULE_0__["default"])('.tabheader__item', '.tabcontent', '.tabheader__items', 'tabheader__item_active');
     (0,_modules_modal_js__WEBPACK_IMPORTED_MODULE_1__["default"])('[data-modal]', '.modal', modalTimerId);
-    (0,_modules_timer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(`.timer`, `2024-12-05`);
+    (0,_modules_timer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(`.timer`, `2025-12-05`);
     (0,_modules_cards_js__WEBPACK_IMPORTED_MODULE_3__["default"])();
     (0,_modules_calc_js__WEBPACK_IMPORTED_MODULE_4__["default"])();
     (0,_modules_forms_js__WEBPACK_IMPORTED_MODULE_5__["default"])(`form`, modalTimerId);
